@@ -3,279 +3,755 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MECANOGRAFÍA - Proyecto Universitario</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <title>WPM — Mecanografía</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Press Start 2P', cursive;
-            background: linear-gradient(135deg, #0a001f, #1a0033);
-            color: #ff00aa;
-            overflow-x: hidden;
-            image-rendering: pixelated; /* Para que las imágenes pixeladas se vean nítidas */
+        :root {
+            --bg:       #0d0d0d;
+            --surface:  #111111;
+            --border:   #1f1f1f;
+            --muted:    #333333;
+            --dim:      #555555;
+            --text:     #c8c8c8;
+            --bright:   #efefef;
+            --green:    #39d353;
+            --yellow:   #e3c16f;
+            --cyan:     #56d4dd;
+            --red:      #ff6b6b;
+            --prompt:   #39d353;
         }
 
-        h1, h2, h3 {
-            text-shadow: 0 0 10px #ff00aa, 0 0 20px #00ffff;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scanline overlay sutil */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.04) 2px,
+                rgba(0,0,0,0.04) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ─── NAVBAR ─── */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-logo {
+            color: var(--green);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-logo::before { content: '~/'; color: var(--dim); }
+
+        .nav-links {
+            display: flex;
+            gap: 4px;
+            flex: 1;
         }
 
         .nav-link {
-            position: relative;
-            transition: all 0.3s;
-            color: #00ffff;
+            font-size: 11px;
+            color: var(--dim);
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            transition: all 0.15s;
+            letter-spacing: 0.05em;
         }
-        .nav-link:hover {
-            color: #ff00aa;
-            text-shadow: 0 0 15px #ff00aa;
+        .nav-link:hover, .nav-link.active {
+            color: var(--bright);
+            background: var(--border);
         }
-        .nav-link:after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 3px;
-            bottom: -6px;
-            left: 0;
-            background: #ff00aa;
-            transition: width 0.4s;
+        .nav-link::before { content: './'; color: var(--muted); }
+
+        .nav-badge {
+            font-size: 10px;
+            color: var(--dim);
+            margin-left: auto;
+            border: 1px solid var(--border);
+            padding: 3px 8px;
+            border-radius: 2px;
         }
-        .nav-link:hover:after {
+        .nav-badge span { color: var(--green); }
+
+        /* ─── SECTIONS ─── */
+        .section { display: none; min-height: 100vh; padding: 100px 32px 80px; }
+        .section.active { display: block; }
+
+        /* ─── HOME ─── */
+        #home {
+            max-width: 860px;
+            margin: 0 auto;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+        }
+        #home.active { display: flex; }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .dot-r { background: #ff5f56; }
+        .dot-y { background: #febc2e; }
+        .dot-g { background: #27c840; }
+        .terminal-title { font-size: 11px; color: var(--dim); margin-left: 8px; }
+
+        .terminal-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .cmd-line {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        .prompt { color: var(--prompt); white-space: nowrap; }
+        .cmd-text { color: var(--bright); }
+        .cmd-comment { color: var(--dim); }
+
+        .output-block {
+            margin-left: 22px;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-left: 2px solid var(--border);
+        }
+
+        .big-title {
+            font-size: clamp(28px, 5vw, 52px);
+            font-weight: 700;
+            color: var(--bright);
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            margin-bottom: 8px;
+        }
+        .big-title .accent { color: var(--green); }
+        .big-title .cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1em;
+            background: var(--green);
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .subtitle { font-size: 12px; color: var(--dim); margin-bottom: 24px; }
+
+        .stat-row {
+            display: flex;
+            gap: 32px;
+            font-size: 11px;
+            color: var(--dim);
+            margin-top: 8px;
+        }
+        .stat-row .val { color: var(--cyan); font-weight: 700; }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid var(--green);
+            color: var(--green);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+            text-decoration: none;
+            letter-spacing: 0.05em;
+        }
+        .btn-primary:hover {
+            background: var(--green);
+            color: var(--bg);
+        }
+        .btn-primary::before { content: '$ '; opacity: 0.6; }
+
+        .platforms {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .platform-tag {
+            font-size: 10px;
+            color: var(--dim);
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            border-radius: 2px;
+        }
+        .platform-tag.web { border-color: var(--cyan); color: var(--cyan); }
+        .platform-tag.android { border-color: var(--yellow); color: var(--yellow); }
+        .platform-tag.ios { border-color: var(--dim); }
+
+        /* ─── GAME ─── */
+        #game {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        #game.active { display: flex; }
+
+        .game-header {
             width: 100%;
+            max-width: 980px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 11px;
+            color: var(--dim);
         }
-
-        .btn-game {
-            animation: pulse 1.8s infinite;
-            transition: all 0.3s;
-            text-shadow: 0 0 10px #000;
-        }
-        .btn-game:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 30px #ff00aa, inset 0 0 20px #00ffff;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .section {
-            animation: fadeInUp 1s ease-out forwards;
-        }
-
-        .hero-title {
-            animation: typing 3s steps(30, end) forwards;
-            overflow: hidden;
-            white-space: nowrap;
-            border-right: 6px solid #00ffff;
-            text-shadow: 0 0 15px #ff00aa;
-        }
-
-        @keyframes typing {
-            from { width: 0 }
-            to { width: 100% }
-        }
+        .game-header .status { display: flex; gap: 20px; }
+        .status-item { display: flex; align-items: center; gap: 6px; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s step-end infinite; }
 
         #unityContainer {
             width: 100%;
             max-width: 960px;
-            height: 600px;
-            border: 8px solid #ff00aa;
-            border-radius: 0; /* Cuadrado puro retro */
-            box-shadow: 0 0 40px #ff00aa, inset 0 0 20px #00ffff;
-            image-rendering: pixelated;
+            height: 580px;
             background: #000;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-shadow: 0 0 0 1px var(--muted), 0 24px 48px rgba(0,0,0,0.6);
+            image-rendering: pixelated;
         }
 
-        img.keyboard-img {
-            image-rendering: pixelated;
-            border: 6px solid #00ffff;
-            box-shadow: 0 0 30px #00ffff;
-            max-width: 100%;
+        .game-footer {
+            margin-top: 12px;
+            font-size: 10px;
+            color: var(--muted);
+            display: flex;
+            gap: 24px;
         }
+        .key-hint kbd {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-family: inherit;
+            font-size: 10px;
+            color: var(--text);
+        }
+
+        /* ─── INSTRUCCIONES ─── */
+        #instructions { max-width: 800px; margin: 0 auto; }
+
+        .section-label {
+            font-size: 10px;
+            color: var(--dim);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--bright);
+            margin-bottom: 32px;
+        }
+        .section-title .accent { color: var(--green); }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+        .step {
+            background: var(--surface);
+            padding: 28px 24px;
+            transition: background 0.2s;
+        }
+        .step:hover { background: var(--bg); }
+        .step-num { font-size: 11px; color: var(--dim); margin-bottom: 12px; }
+        .step-num span { color: var(--green); }
+        .step-title { font-size: 13px; color: var(--bright); font-weight: 700; margin-bottom: 6px; }
+        .step-desc { font-size: 11px; color: var(--dim); line-height: 1.6; }
+
+        .keyboard-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 32px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .keyboard-block img {
+            width: 100%;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+            filter: grayscale(30%) brightness(0.85);
+        }
+
+        .hand-map { font-size: 11px; line-height: 2; }
+        .hand-map .row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+        .hand-label { color: var(--dim); width: 80px; }
+        .keys { display: flex; gap: 6px; }
+        .key {
+            background: var(--border);
+            border: 1px solid var(--muted);
+            border-bottom: 2px solid var(--muted);
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            color: var(--bright);
+        }
+        .key.home { border-color: var(--green); color: var(--green); }
+
+        .video-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            padding: 9px 18px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--dim);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .video-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+        .video-btn::before { content: '▶ '; }
+
+        /* ─── RANKING ─── */
+        #ranking { max-width: 700px; margin: 0 auto; }
+
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .table-cmd {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--dim);
+            display: flex;
+            gap: 8px;
+        }
+        .table-cmd .prompt { color: var(--green); }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { border-bottom: 1px solid var(--border); }
+        th {
+            padding: 12px 20px;
+            text-align: left;
+            font-size: 10px;
+            color: var(--dim);
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        th:last-child { text-align: right; }
+        td { padding: 14px 20px; font-size: 12px; color: var(--text); }
+        td:last-child { text-align: right; }
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--bg); }
+
+        .rank-pos { color: var(--dim); font-size: 11px; }
+        .rank-pos.gold { color: var(--yellow); }
+        .rank-pos.silver { color: var(--text); }
+        .rank-pos.bronze { color: #cd7f32; }
+
+        .wpm-val { color: var(--green); font-weight: 700; }
+        .acc-val { color: var(--cyan); }
+
+        .rank-bar {
+            display: inline-block;
+            height: 3px;
+            background: var(--green);
+            border-radius: 2px;
+            vertical-align: middle;
+            margin-left: 8px;
+            opacity: 0.4;
+        }
+
+        /* ─── ABOUT ─── */
+        #about { max-width: 700px; margin: 0 auto; }
+
+        .about-terminal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .about-bar {
+            background: var(--border);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .about-bar .dot { width: 8px; height: 8px; }
+        .about-bar .filename { font-size: 11px; color: var(--dim); margin-left: 8px; }
+        .about-body { padding: 28px 32px; }
+
+        .info-block { margin-bottom: 20px; }
+        .info-key { font-size: 10px; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+        .info-val { font-size: 13px; color: var(--bright); }
+        .info-val a { color: var(--cyan); text-decoration: none; }
+        .info-val a:hover { text-decoration: underline; }
+
+        .tech-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .tech-tag {
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 2px;
+            border: 1px solid var(--border);
+            color: var(--dim);
+        }
+        .tech-tag.highlight { border-color: var(--green); color: var(--green); }
+        .tech-tag.alt { border-color: var(--cyan); color: var(--cyan); }
+
+        .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+        .copyright { font-size: 10px; color: var(--muted); }
+
+        /* ─── FOOTER ─── */
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+            padding: 10px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--muted);
+        }
+        footer .left { display: flex; gap: 16px; align-items: center; }
+        footer .ping { color: var(--green); }
+        footer .right { color: var(--dim); }
+
+        /* ─── ANIMACIÓN ENTRADA ─── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .section.active { animation: fadeIn 0.25s ease; }
     </style>
 </head>
-<body class="min-h-screen">
+<body>
 
-    <!-- NAVBAR RETRO -->
-    <nav class="bg-black/80 fixed top-0 w-full z-50 border-b-4 border-[#ff00aa]">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-2xl tracking-widest text-[#00ffff]">WPM</h1>
-            <div class="flex gap-8 text-sm">
-                <a href="#" onclick="showSection('home')" class="nav-link">INICIO</a>
-                <a href="#" onclick="showSection('game')" class="nav-link">JUGAR</a>
-                <a href="#" onclick="showSection('instructions')" class="nav-link">INSTRUCCIONES</a>
-                <a href="#" onclick="showSection('ranking')" class="nav-link">RANKING</a>
-                <a href="#" onclick="showSection('about')" class="nav-link">ACERCA DE</a>
+<!-- NAVBAR -->
+<nav>
+    <div class="nav-logo">wpm</div>
+    <div class="nav-links">
+        <a href="#" class="nav-link active" onclick="showSection('home', this)">inicio</a>
+        <a href="#" class="nav-link" onclick="showSection('game', this)">jugar</a>
+        <a href="#" class="nav-link" onclick="showSection('instructions', this)">instrucciones</a>
+        <a href="#" class="nav-link" onclick="showSection('ranking', this)">ranking</a>
+        <a href="#" class="nav-link" onclick="showSection('about', this)">acerca</a>
+    </div>
+    <div class="nav-badge">ver <span>2026</span></div>
+</nav>
+
+<!-- INICIO -->
+<section id="home" class="section active">
+    <div class="terminal-header">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <span class="terminal-title">ramses@wpm-project:~</span>
+    </div>
+
+    <div class="terminal-box">
+        <div class="cmd-line">
+            <span class="prompt">❯</span>
+            <span class="cmd-text">./run_app.sh --mode production</span>
+        </div>
+        <div class="cmd-line">
+            <span class="prompt" style="color:var(--dim)">→</span>
+            <span class="cmd-comment"># iniciando WPM Mecanografía v2026...</span>
+        </div>
+
+        <div class="output-block">
+            <div class="big-title">
+                MEJORA TU<br>
+                <span class="accent">VELOCIDAD</span><span class="cursor"></span>
             </div>
-            <div class="text-xs bg-[#ff00aa] text-black px-4 py-1 border-2 border-[#00ffff]">
-                v2026 UTC
+            <div class="subtitle">Proyecto Integrador · Ramses Vladimir · 2026</div>
+            <div class="stat-row">
+                <span>plataformas: <span class="val">3</span></span>
+                <span>niveles: <span class="val">3</span></span>
+                <span>récord: <span class="val">148 WPM</span></span>
             </div>
         </div>
-    </nav>
 
-    <!-- SECCIÓN INICIO (Hero) -->
-    <section id="home" class="section min-h-screen flex items-center justify-center pt-24">
-        <div class="text-center px-6 max-w-4xl">
-            <h2 class="hero-title text-5xl md:text-7xl font-bold mb-8 text-[#ff00aa]">
-                MEJORA TU VELOCIDAD
-            </h2>
-            <p class="text-xl mb-10 text-[#00ffff]">Proyecto Integrador • RAMSES VLADIMIR</p>
-            
-            <button onclick="showSection('game')" 
-                    class="btn-game px-16 py-6 bg-[#ff00aa] text-black text-2xl font-bold border-4 border-[#00ffff] shadow-2xl">
-                JUGAR AHORA
+        <div class="cmd-line" style="margin-top:8px;">
+            <span class="prompt">❯</span>
+            <button class="btn-primary" onclick="showSection('game', document.querySelector('[onclick*=game]'))">
+                start_game --now
             </button>
-            
-            <div class="mt-16 flex justify-center gap-12 text-sm text-[#00ffff]">
-                <div>WEB</div>
-                <div>ANDROID (EXPO)</div>
-                <div>IOS (EXPO)</div>
-            </div>
         </div>
-    </section>
+    </div>
 
-    <!-- SECCIÓN JUGAR -->
-    <section id="game" class="section hidden min-h-screen pt-24 bg-black/80 flex items-center justify-center">
-        <div class="text-center px-6">
-            <h2 class="text-4xl mb-8 text-[#ff00aa]">A TIPEAR!!!</h2>
-            <div id="unityContainer" class="mx-auto"></div>
-            <p class="mt-6 text-sm text-[#00ffff]">ESPACIO PARA INICIAR • ESC PARA MENÚ</p>
+    <div class="platforms">
+        <span class="platform-tag web">● WEB</span>
+        <span class="platform-tag android">● ANDROID (EXPO)</span>
+        <span class="platform-tag ios">○ IOS (EXPO)</span>
+    </div>
+</section>
+
+<!-- JUGAR -->
+<section id="game" class="section">
+    <div class="game-header">
+        <div style="display:flex;align-items:center;gap:10px;font-size:11px;">
+            <span style="color:var(--dim)">~/wpm/game</span>
         </div>
-    </section>
-
-    <!-- SECCIÓN INSTRUCCIONES (con imagen y video) -->
-    <section id="instructions" class="section hidden min-h-screen pt-24 px-6 max-w-5xl mx-auto">
-        <h2 class="text-4xl mb-12 text-center text-[#ff00aa]">CÓMO JUGAR</h2>
-        
-        <div class="grid md:grid-cols-3 gap-8 mb-16">
-            <div class="bg-black/50 p-8 border-4 border-[#00ffff] text-center">
-                <div class="text-6xl mb-4 text-[#ff00aa]">1</div>
-                <h3 class="text-xl mb-2">ELIGE NIVEL</h3>
-                <p class="text-sm text-[#00ffff]">FÁCIL - MEDIO - DIFÍCIL</p>
-            </div>
-            <div class="bg-black/50 p-8 border-4 border-[#00ffff] text-center">
-                <div class="text-6xl mb-4 text-[#ff00aa]">2</div>
-                <h3 class="text-xl mb-2">TIPEA RÁPIDO</h3>
-                <p class="text-sm text-[#00ffff]">SIN ERRORES - CADA ERROR RESTA</p>
-            </div>
-            <div class="bg-black/50 p-8 border-4 border-[#00ffff] text-center">
-                <div class="text-6xl mb-4 text-[#ff00aa]">3</div>
-                <h3 class="text-xl mb-2">SUPERA RÉCORD</h3>
-                <p class="text-sm text-[#00ffff]">ENTRA AL RANKING</p>
-            </div>
+        <div class="status">
+            <div class="status-item"><div class="status-dot"></div><span>unity webgl</span></div>
+            <div class="status-item" style="color:var(--dim)">ESPACIO para iniciar · ESC para menú</div>
         </div>
+    </div>
 
-        <!-- Imagen y video retro -->
-        <div class="bg-black/50 p-8 border-4 border-[#ff00aa] text-center">
-            <h3 class="text-2xl mb-6 text-[#00ffff]">POSICIÓN DE MANOS - FILA HOGAR</h3>
-            
-            <div class="flex flex-col md:flex-row gap-10 items-center justify-center">
-                <div class="flex-1">
-                    <img src="/TemplateData/mecanografia.jpg" 
-                        alt="Posición correcta de las manos en el teclado" 
-                        class="keyboard-img mx-auto">
-                    <p class="mt-4 text-sm text-[#00ffff]">
-                        ÍNDICES EN F y J<br>
-                        IZQUIERDA: A S D F<br>
-                        DERECHA: J K L Ñ
-                    </p>
+    <div id="unityContainer"></div>
+
+    <div class="game-footer">
+        <span class="key-hint"><kbd>SPACE</kbd> iniciar</span>
+        <span class="key-hint"><kbd>ESC</kbd> menú</span>
+        <span class="key-hint"><kbd>F</kbd> + <kbd>J</kbd> dedos índice</span>
+    </div>
+</section>
+
+<!-- INSTRUCCIONES -->
+<section id="instructions" class="section">
+    <div class="section-label">// docs</div>
+    <div class="section-title">cómo <span class="accent">jugar</span></div>
+
+    <div class="steps-grid">
+        <div class="step">
+            <div class="step-num">paso <span>01</span></div>
+            <div class="step-title">elige nivel</div>
+            <div class="step-desc">fácil · medio · difícil<br>cada nivel ajusta la velocidad y complejidad del texto</div>
+        </div>
+        <div class="step">
+            <div class="step-num">paso <span>02</span></div>
+            <div class="step-title">tipea rápido</div>
+            <div class="step-desc">sin errores — cada error resta puntos al contador final de WPM</div>
+        </div>
+        <div class="step">
+            <div class="step-num">paso <span>03</span></div>
+            <div class="step-title">supera récord</div>
+            <div class="step-desc">termina en el top y entra al ranking global del servidor</div>
+        </div>
+    </div>
+
+    <div class="keyboard-block">
+        <div>
+            <img src="/TemplateData/mecanografia.jpg" alt="Posición de manos en teclado">
+        </div>
+        <div>
+            <div class="section-label" style="margin-bottom:16px;">// fila hogar</div>
+            <div class="hand-map">
+                <div class="row">
+                    <span class="hand-label">izquierda</span>
+                    <div class="keys">
+                        <span class="key">A</span>
+                        <span class="key">S</span>
+                        <span class="key">D</span>
+                        <span class="key home">F ●</span>
+                    </div>
                 </div>
-                
-                <div class="flex-1">
-                    <p class="text-lg mb-6 text-[#ff00aa]">
-                        MIRA ESTE VIDEO ANTES DE JUGAR
-                    </p>
-                    <a href="https://www.youtube.com/watch?v=lcxkRC1kTvQ" 
-                       target="_blank" 
-                       rel="noopener noreferrer"
-                       class="inline-block px-10 py-5 bg-[#ff00aa] text-black font-bold border-4 border-[#00ffff] hover:bg-[#00ffff] hover:text-black transition-colors">
-                        VER VIDEO
-                    </a>
+                <div class="row">
+                    <span class="hand-label">derecha</span>
+                    <div class="keys">
+                        <span class="key home">● J</span>
+                        <span class="key">K</span>
+                        <span class="key">L</span>
+                        <span class="key">Ñ</span>
+                    </div>
+                </div>
+                <div class="row" style="margin-top:8px;">
+                    <span class="hand-label" style="color:var(--green);font-size:10px;">● = índice</span>
                 </div>
             </div>
+            <a href="https://www.youtube.com/watch?v=lcxkRC1kTvQ" target="_blank" rel="noopener" class="video-btn">
+                ver tutorial en video
+            </a>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- SECCIÓN RANKING -->
-    <section id="ranking" class="section hidden min-h-screen pt-24 px-6 max-w-4xl mx-auto">
-        <h2 class="text-4xl mb-12 text-center text-[#ff00aa]">RANKING GLOBAL</h2>
-        <div class="bg-black/50 border-4 border-[#00ffff] overflow-hidden">
-            <table class="w-full text-sm text-[#00ffff]">
-                <thead class="bg-[#ff00aa] text-black">
-                    <tr>
-                        <th class="py-5 px-8 text-left">POS</th>
-                        <th class="py-5 px-8 text-left">JUGADOR</th>
-                        <th class="py-5 px-8 text-right">WPM</th>
-                        <th class="py-5 px-8 text-right">PRECISIÓN</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="border-b border-[#00ffff]/30">
-                        <td class="py-6 px-8">1</td>
-                        <td class="py-6 px-8">Vladi123</td>
-                        <td class="py-6 px-8 text-right font-bold">148</td>
-                        <td class="py-6 px-8 text-right">99%</td>
-                    </tr>
-                    <tr class="border-b border-[#00ffff]/30">
-                        <td class="py-6 px-8">2</td>
-                        <td class="py-6 px-8">Marlon Montoya</td>
-                        <td class="py-6 px-8 text-right font-bold">132</td>
-                        <td class="py-6 px-8 text-right">97%</td>
-                    </tr>
-                    <tr>
-                        <td class="py-6 px-8">3</td>
-                        <td class="py-6 px-8">Marco GLs</td>
-                        <td class="py-6 px-8 text-right font-bold">119</td>
-                        <td class="py-6 px-8 text-right">95%</td>
-                    </tr>
-                </tbody>
-            </table>
+<!-- RANKING -->
+<section id="ranking" class="section">
+    <div class="section-label">// leaderboard</div>
+    <div class="section-title">ranking <span class="accent">global</span></div>
+
+    <div class="table-wrap">
+        <div class="table-cmd">
+            <span class="prompt">❯</span>
+            <span>SELECT * FROM scores ORDER BY wpm DESC LIMIT 10;</span>
         </div>
-    </section>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>jugador</th>
+                    <th>wpm</th>
+                    <th>precisión</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="rank-pos gold">01</span></td>
+                    <td>Vladi123</td>
+                    <td><span class="wpm-val">148</span><span class="rank-bar" style="width:74px"></span></td>
+                    <td><span class="acc-val">99%</span></td>
+                </tr>
+                <tr>
+                    <td><span class="rank-pos silver">02</span></td>
+                    <td>Marlon Montoya</td>
+                    <td><span class="wpm-val">132</span><span class="rank-bar" style="width:66px"></span></td>
+                    <td><span class="acc-val">97%</span></td>
+                </tr>
+                <tr>
+                    <td><span class="rank-pos bronze">03</span></td>
+                    <td>Marco GLs</td>
+                    <td><span class="wpm-val">119</span><span class="rank-bar" style="width:60px"></span></td>
+                    <td><span class="acc-val">95%</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
 
-    <!-- SECCIÓN ACERCA DE -->
-    <section id="about" class="section hidden min-h-screen pt-24 px-6 max-w-3xl mx-auto text-center">
-        <h2 class="text-4xl mb-10 text-[#ff00aa]">ACERCA DEL PROYECTO</h2>
-        <p class="text-lg mb-10 text-[#00ffff]">
-            PROYECTO INTEGRADOR UNIVERSITARIO<br>
-            JUEGO EN UNITY (WEBGL) + VERSIÓN MÓVIL CON REACT NATIVE + EXPO GO
-        </p>
-        <div class="flex justify-center gap-8 text-sm">
-            <div class="bg-black/50 px-8 py-4 border-4 border-[#ff00aa]">UNITY WEBGL</div>
-            <div class="bg-black/50 px-8 py-4 border-4 border-[#ff00aa]">REACT NATIVE (EXPO)</div>
+<!-- ACERCA DE -->
+<section id="about" class="section">
+    <div class="section-label">// readme</div>
+    <div class="section-title">acerca del <span class="accent">proyecto</span></div>
+
+    <div class="about-terminal">
+        <div class="about-bar">
+            <div class="dot dot-r"></div>
+            <div class="dot dot-y"></div>
+            <div class="dot dot-g"></div>
+            <span class="filename">README.md</span>
         </div>
-        <p class="mt-16 text-sm text-[#00ffff]"> © 2026 </p>
-    </section>
+        <div class="about-body">
+            <div class="info-block">
+                <div class="info-key">nombre</div>
+                <div class="info-val">WPM — Juego de Mecanografía</div>
+            </div>
+            <div class="info-block">
+                <div class="info-key">autor</div>
+                <div class="info-val">Ramses Vladimir</div>
+            </div>
+            <div class="info-block">
+                <div class="info-key">tipo</div>
+                <div class="info-val">Proyecto Integrador Universitario</div>
+            </div>
+            <div class="info-block">
+                <div class="info-key">descripción</div>
+                <div class="info-val" style="font-size:12px;color:var(--dim);line-height:1.8;">
+                    Juego de mecanografía multiplataforma desarrollado con Unity (WebGL) para web y React Native + Expo Go para dispositivos móviles.
+                </div>
+            </div>
+            <hr class="divider">
+            <div class="info-block">
+                <div class="info-key">stack técnico</div>
+                <div class="tech-list">
+                    <span class="tech-tag highlight">Unity WebGL</span>
+                    <span class="tech-tag alt">React Native</span>
+                    <span class="tech-tag alt">Expo Go</span>
+                    <span class="tech-tag">HTML / CSS / JS</span>
+                    <span class="tech-tag">Android</span>
+                    <span class="tech-tag">iOS</span>
+                </div>
+            </div>
+            <hr class="divider">
+            <div class="copyright">© 2026 — todos los derechos reservados</div>
+        </div>
+    </div>
+</section>
 
-    <!-- FOOTER RETRO -->
-    <footer class="fixed bottom-0 w-full bg-black/90 text-sm py-4 text-center border-t-4 border-[#ff00aa] text-[#00ffff]">
-        MULTIPLATAFORMA: WEB + ANDROID + IOS • PROYECTO UNIVERSITARIO 2026
-    </footer>
+<!-- FOOTER -->
+<footer>
+    <div class="left">
+        <span>WPM</span>
+        <span class="ping">● online</span>
+    </div>
+    <div class="right">multiplataforma: web + android + ios · proyecto universitario 2026</div>
+</footer>
 
-    <!-- SCRIPTS UNITY -->
-    <script src="TemplateData/UnityProgress.js"></script>
-    <script src="Build/UnityLoader.js"></script>
-    <script>
-        tailwind.config = { content: ["*"] }
+<!-- SCRIPTS UNITY -->
+<script src="TemplateData/UnityProgress.js"></script>
+<script src="Build/UnityLoader.js"></script>
+<script>
+    function showSection(id, el) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
 
-        function showSection(section) {
-            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(section).classList.remove('hidden');
-            
-            if (section === 'game' && !window.unityLoaded) {
-                window.unityLoaded = true;
+        document.getElementById(id).classList.add('active');
+        if (el && el.classList) el.classList.add('active');
+
+        if (id === 'game' && !window.unityLoaded) {
+            window.unityLoaded = true;
+            if (typeof UnityLoader !== 'undefined') {
                 UnityLoader.instantiate("unityContainer", "Build/INTEGRADORA.json", {
-                    onProgress: UnityProgress
+                    onProgress: typeof UnityProgress !== 'undefined' ? UnityProgress : undefined
                 });
             }
         }
+    }
 
-        window.onload = () => showSection('home');
-    </script>
+    window.onload = () => showSection('home', document.querySelector('.nav-link'));
+</script>
 </body>
 </html>
