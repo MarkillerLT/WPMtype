@@ -4,188 +4,245 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WPM — Mecanografía</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg:       #0d0d0d;
-            --surface:  #111111;
-            --border:   #1f1f1f;
-            --muted:    #333333;
-            --dim:      #555555;
-            --text:     #c8c8c8;
-            --bright:   #efefef;
-            --green:    #39d353;
-            --yellow:   #e3c16f;
-            --cyan:     #56d4dd;
-            --red:      #ff6b6b;
-            --prompt:   #39d353;
+            --bg:      #0d0d0d;
+            --surface: #111111;
+            --border:  #1f1f1f;
+            --muted:   #333333;
+            --dim:     #555555;
+            --text:    #c8c8c8;
+            --bright:  #efefef;
+            --green:   #39d353;
+            --yellow:  #e3c16f;
+            --cyan:    #56d4dd;
+            --nav-h:   58px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* Scanline overlay sutil */
         body::before {
             content: '';
-            position: fixed;
-            inset: 0;
+            position: fixed; inset: 0;
             background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(0,0,0,0.04) 2px,
-                rgba(0,0,0,0.04) 4px
+                0deg, transparent, transparent 2px,
+                rgba(0,0,0,0.035) 2px, rgba(0,0,0,0.035) 4px
             );
             pointer-events: none;
             z-index: 9999;
         }
 
-        /* ─── NAVBAR ─── */
+        /* ══ NAVBAR ══ */
         nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 100;
-            background: var(--bg);
+            position: fixed; top: 0; width: 100%;
+            z-index: 200;
+            background: rgba(13,13,13,0.96);
+            backdrop-filter: blur(8px);
             border-bottom: 1px solid var(--border);
-            padding: 14px 32px;
+            height: var(--nav-h);
             display: flex;
             align-items: center;
-            gap: 32px;
+            padding: 0 28px;
         }
 
         .nav-logo {
-            color: var(--green);
-            font-size: 13px;
+            font-size: 16px;
             font-weight: 700;
-            letter-spacing: 0.05em;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            color: var(--green);
+            letter-spacing: 0.08em;
+            white-space: nowrap;
+            padding-right: 22px;
+            border-right: 1px solid var(--border);
+            margin-right: 18px;
+            flex-shrink: 0;
         }
-        .nav-logo::before { content: '~/'; color: var(--dim); }
+        .nav-logo::before { content: '~/'; color: var(--dim); font-weight: 400; }
 
         .nav-links {
             display: flex;
-            gap: 4px;
+            gap: 2px;
             flex: 1;
+            overflow-x: auto;
+            scrollbar-width: none;
         }
+        .nav-links::-webkit-scrollbar { display: none; }
 
         .nav-link {
-            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 500;
             color: var(--dim);
             text-decoration: none;
-            padding: 5px 10px;
-            border-radius: 3px;
-            transition: all 0.15s;
-            letter-spacing: 0.05em;
+            padding: 7px 14px;
+            border-radius: 4px;
+            transition: color 0.15s, background 0.15s;
+            white-space: nowrap;
+            letter-spacing: 0.04em;
+            cursor: pointer;
         }
-        .nav-link:hover, .nav-link.active {
-            color: var(--bright);
-            background: var(--border);
-        }
-        .nav-link::before { content: './'; color: var(--muted); }
+        .nav-link::before { content: './'; color: var(--muted); font-size: 12px; }
+        .nav-link:hover  { color: var(--text); background: var(--surface); }
+        .nav-link.active { color: var(--bright); background: var(--border); }
+        .nav-link.active::before { color: var(--green); }
 
         .nav-badge {
-            font-size: 10px;
+            font-size: 11px;
             color: var(--dim);
-            margin-left: auto;
             border: 1px solid var(--border);
-            padding: 3px 8px;
-            border-radius: 2px;
+            padding: 4px 10px;
+            border-radius: 3px;
+            white-space: nowrap;
+            margin-left: auto;
+            flex-shrink: 0;
         }
         .nav-badge span { color: var(--green); }
 
-        /* ─── SECTIONS ─── */
-        .section { display: none; min-height: 100vh; padding: 100px 32px 80px; }
-        .section.active { display: block; }
-
-        /* ─── HOME ─── */
-        #home {
-            max-width: 860px;
-            margin: 0 auto;
+        .nav-hamburger {
             display: none;
             flex-direction: column;
-            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            margin-left: auto;
+            padding: 7px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            flex-shrink: 0;
         }
-        #home.active { display: flex; }
+        .nav-hamburger span {
+            display: block;
+            width: 20px; height: 1px;
+            background: var(--text);
+            transition: all 0.2s;
+        }
 
-        .terminal-header {
+        .nav-drawer {
+            display: none;
+            position: fixed;
+            top: var(--nav-h);
+            left: 0; right: 0;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px 20px;
+            z-index: 190;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .nav-drawer.open { display: flex; }
+        .nav-drawer .nav-link { font-size: 15px; padding: 11px 14px; }
+
+        /* ══ SECTIONS ══ */
+        .section {
+            display: none;
+            min-height: 100vh;
+            padding: calc(var(--nav-h) + 44px) 28px 80px;
+        }
+        .section.active { display: block; animation: sIn 0.28s ease; }
+        #home.active, #game.active { display: flex; }
+        #home.active { flex-direction: column; align-items: center; justify-content: center; }
+        #game.active { flex-direction: column; align-items: center; justify-content: center; }
+
+        @keyframes sIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ══ HOME ══ */
+        .terminal-window {
+            width: 100%; max-width: 820px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+        }
+
+        .win-bar {
+            background: #161616;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 16px;
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 32px;
         }
-        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
         .dot-r { background: #ff5f56; }
         .dot-y { background: #febc2e; }
         .dot-g { background: #27c840; }
-        .terminal-title { font-size: 11px; color: var(--dim); margin-left: 8px; }
+        .win-title { font-size: 11px; color: var(--dim); margin: 0 auto; letter-spacing: 0.06em; }
 
-        .terminal-box {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 32px;
-            margin-bottom: 24px;
-        }
+        .win-body { padding: 28px 28px 32px; }
 
-        .cmd-line {
+        .cli-line {
             display: flex;
             align-items: flex-start;
             gap: 10px;
-            margin-bottom: 10px;
-            font-size: 13px;
+            margin-bottom: 6px;
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0;
+            transition: opacity 0.2s;
         }
-        .prompt { color: var(--prompt); white-space: nowrap; }
-        .cmd-text { color: var(--bright); }
-        .cmd-comment { color: var(--dim); }
+        .cli-line.visible { opacity: 1; }
 
-        .output-block {
+        .p    { color: var(--green); flex-shrink: 0; user-select: none; }
+        .cmd  { color: var(--bright); }
+        .cmt  { color: var(--dim); font-style: italic; }
+
+        .out {
             margin-left: 22px;
-            margin-bottom: 16px;
-            padding: 12px 16px;
+            padding-left: 14px;
             border-left: 2px solid var(--border);
+            margin-bottom: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
+        .out.visible { opacity: 1; }
 
-        .big-title {
-            font-size: clamp(28px, 5vw, 52px);
+        /* typewriter cursor */
+        .typewriter {
+            overflow: hidden;
+            white-space: nowrap;
+            display: inline-block;
+        }
+        .typewriter.typing {
+            border-right: 2px solid var(--green);
+            animation: caretBlink 0.7s step-end infinite;
+        }
+        @keyframes caretBlink { 50% { border-right-color: transparent; } }
+
+        .hero-title {
+            font-size: clamp(28px, 5.5vw, 56px);
             font-weight: 700;
             color: var(--bright);
+            line-height: 1.05;
             letter-spacing: -0.02em;
-            line-height: 1.1;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
-        .big-title .accent { color: var(--green); }
-        .big-title .cursor {
-            display: inline-block;
-            width: 3px;
-            height: 1em;
-            background: var(--green);
-            vertical-align: text-bottom;
-            animation: blink 1s step-end infinite;
-        }
-        @keyframes blink { 50% { opacity: 0; } }
+        .hero-title .acc { color: var(--green); }
 
-        .subtitle { font-size: 12px; color: var(--dim); margin-bottom: 24px; }
+        .hero-sub { font-size: 12px; color: var(--dim); margin-bottom: 20px; letter-spacing: 0.05em; }
 
         .stat-row {
             display: flex;
-            gap: 32px;
+            flex-wrap: wrap;
+            gap: 20px;
             font-size: 11px;
             color: var(--dim);
-            margin-top: 8px;
+            margin-bottom: 24px;
         }
-        .stat-row .val { color: var(--cyan); font-weight: 700; }
+        .stat-row .v { color: var(--cyan); }
 
-        .btn-primary {
+        .btn-cli {
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -194,564 +251,608 @@
             border: 1px solid var(--green);
             color: var(--green);
             font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: 500;
             cursor: pointer;
-            border-radius: 3px;
-            transition: all 0.2s;
-            text-decoration: none;
-            letter-spacing: 0.05em;
+            border-radius: 4px;
+            transition: background 0.15s, color 0.15s;
+            letter-spacing: 0.04em;
         }
-        .btn-primary:hover {
-            background: var(--green);
-            color: var(--bg);
-        }
-        .btn-primary::before { content: '$ '; opacity: 0.6; }
+        .btn-cli::before { content: '$ '; opacity: 0.5; }
+        .btn-cli:hover { background: var(--green); color: var(--bg); }
 
         .platforms {
             display: flex;
-            gap: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
             margin-top: 24px;
         }
-        .platform-tag {
-            font-size: 10px;
-            color: var(--dim);
+        .ptag {
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 3px;
             border: 1px solid var(--border);
-            padding: 4px 10px;
-            border-radius: 2px;
+            color: var(--dim);
+            letter-spacing: 0.06em;
         }
-        .platform-tag.web { border-color: var(--cyan); color: var(--cyan); }
-        .platform-tag.android { border-color: var(--yellow); color: var(--yellow); }
-        .platform-tag.ios { border-color: var(--dim); }
+        .ptag.web   { border-color: var(--cyan);   color: var(--cyan); }
+        .ptag.droid { border-color: var(--yellow);  color: var(--yellow); }
 
-        /* ─── GAME ─── */
-        #game {
-            display: none;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-        #game.active { display: flex; }
-
-        .game-header {
-            width: 100%;
-            max-width: 980px;
+        /* ══ GAME ══ */
+        .game-hdr {
+            width: 100%; max-width: 980px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 16px;
-            font-size: 11px;
+            margin-bottom: 14px;
+            font-size: 12px;
             color: var(--dim);
+            flex-wrap: wrap;
+            gap: 8px;
         }
-        .game-header .status { display: flex; gap: 20px; }
-        .status-item { display: flex; align-items: center; gap: 6px; }
-        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s step-end infinite; }
+        .pulse-dot {
+            display: inline-block;
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            margin-right: 7px;
+            animation: pd 2s ease-in-out infinite;
+        }
+        @keyframes pd { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
         #unityContainer {
-            width: 100%;
-            max-width: 960px;
-            height: 580px;
+            width: 100%; max-width: 960px;
+            height: clamp(320px, 55vw, 580px);
             background: #000;
             border: 1px solid var(--border);
-            border-radius: 4px;
+            border-radius: 6px;
             box-shadow: 0 0 0 1px var(--muted), 0 24px 48px rgba(0,0,0,0.6);
             image-rendering: pixelated;
         }
 
-        .game-footer {
+        .game-ftr {
             margin-top: 12px;
-            font-size: 10px;
-            color: var(--muted);
             display: flex;
-            gap: 24px;
+            flex-wrap: wrap;
+            gap: 20px;
+            font-size: 11px;
+            color: var(--muted);
         }
-        .key-hint kbd {
+        kbd {
             background: var(--surface);
             border: 1px solid var(--border);
-            padding: 2px 6px;
-            border-radius: 2px;
-            font-family: inherit;
+            border-bottom: 2px solid var(--muted);
+            padding: 2px 7px;
+            border-radius: 3px;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 10px;
             color: var(--text);
         }
 
-        /* ─── INSTRUCCIONES ─── */
-        #instructions { max-width: 800px; margin: 0 auto; }
+        /* ══ INSTRUCCIONES ══ */
+        #instructions { max-width: 860px; margin: 0 auto; }
 
-        .section-label {
-            font-size: 10px;
-            color: var(--dim);
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-        }
-        .section-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--bright);
-            margin-bottom: 32px;
-        }
-        .section-title .accent { color: var(--green); }
+        .sec-label { font-size: 10px; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; }
+        .sec-title { font-size: clamp(18px, 3vw, 26px); font-weight: 700; color: var(--bright); margin-bottom: 32px; }
+        .sec-title .acc { color: var(--green); }
 
         .steps-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1px;
             background: var(--border);
             border: 1px solid var(--border);
-            border-radius: 4px;
+            border-radius: 6px;
             overflow: hidden;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
         }
-        .step {
-            background: var(--surface);
-            padding: 28px 24px;
-            transition: background 0.2s;
-        }
-        .step:hover { background: var(--bg); }
-        .step-num { font-size: 11px; color: var(--dim); margin-bottom: 12px; }
-        .step-num span { color: var(--green); }
-        .step-title { font-size: 13px; color: var(--bright); font-weight: 700; margin-bottom: 6px; }
-        .step-desc { font-size: 11px; color: var(--dim); line-height: 1.6; }
+        .step { background: var(--surface); padding: 28px 22px; transition: background 0.15s; }
+        .step:hover { background: #161616; }
+        .step-n { font-size: 10px; color: var(--dim); margin-bottom: 12px; letter-spacing: 0.1em; }
+        .step-n span { color: var(--green); }
+        .step-t { font-size: 14px; color: var(--bright); font-weight: 700; margin-bottom: 8px; }
+        .step-d { font-size: 11px; color: var(--dim); line-height: 1.7; }
 
-        .keyboard-block {
+        .kb-block {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 32px;
+            border-radius: 6px;
+            padding: 28px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 32px;
+            gap: 28px;
             align-items: center;
         }
-
-        .keyboard-block img {
+        .kb-block img {
             width: 100%;
-            border-radius: 3px;
+            border-radius: 4px;
             border: 1px solid var(--border);
-            filter: grayscale(30%) brightness(0.85);
+            filter: grayscale(20%) brightness(0.8);
         }
-
-        .hand-map { font-size: 11px; line-height: 2; }
-        .hand-map .row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-        .hand-label { color: var(--dim); width: 80px; }
-        .keys { display: flex; gap: 6px; }
+        .hand-map { font-size: 11px; }
+        .hrow { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+        .hlabel { color: var(--dim); min-width: 78px; font-size: 10px; letter-spacing: 0.06em; }
+        .keys { display: flex; gap: 5px; flex-wrap: wrap; }
         .key {
             background: var(--border);
             border: 1px solid var(--muted);
             border-bottom: 2px solid var(--muted);
-            padding: 4px 8px;
+            padding: 6px 10px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 12px;
             color: var(--bright);
         }
         .key.home { border-color: var(--green); color: var(--green); }
-
-        .video-btn {
+        .vid-btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             margin-top: 20px;
-            padding: 9px 18px;
+            padding: 9px 16px;
             background: transparent;
             border: 1px solid var(--border);
             color: var(--dim);
             font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
+            font-size: 12px;
             cursor: pointer;
-            border-radius: 3px;
-            transition: all 0.2s;
+            border-radius: 4px;
+            transition: border-color 0.15s, color 0.15s;
             text-decoration: none;
         }
-        .video-btn:hover { border-color: var(--cyan); color: var(--cyan); }
-        .video-btn::before { content: '▶ '; }
+        .vid-btn::before { content: '▶  '; }
+        .vid-btn:hover { border-color: var(--cyan); color: var(--cyan); }
 
-        /* ─── RANKING ─── */
-        #ranking { max-width: 700px; margin: 0 auto; }
+        /* ══ RANKING ══ */
+        #ranking { max-width: 720px; margin: 0 auto; }
 
-        .table-wrap {
+        .tbl-wrap {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 4px;
+            border-radius: 6px;
             overflow: hidden;
         }
-
-        .table-cmd {
+        .tbl-cmd {
             padding: 14px 20px;
             border-bottom: 1px solid var(--border);
-            font-size: 11px;
+            font-size: 12px;
             color: var(--dim);
             display: flex;
-            gap: 8px;
+            gap: 10px;
+            overflow-x: auto;
+            white-space: nowrap;
         }
-        .table-cmd .prompt { color: var(--green); }
+        .tbl-cmd .p { font-size: 13px; }
 
         table { width: 100%; border-collapse: collapse; }
         thead tr { border-bottom: 1px solid var(--border); }
-        th {
-            padding: 12px 20px;
-            text-align: left;
-            font-size: 10px;
-            color: var(--dim);
-            font-weight: 400;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-        }
-        th:last-child { text-align: right; }
-        td { padding: 14px 20px; font-size: 12px; color: var(--text); }
-        td:last-child { text-align: right; }
-        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+        th { padding: 12px 20px; text-align: left; font-size: 11px; color: var(--dim); font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; }
+        th:nth-child(3), th:nth-child(4) { text-align: right; }
+        td { padding: 16px 20px; font-size: 13px; color: var(--text); }
+        td:nth-child(3), td:nth-child(4) { text-align: right; }
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
         tbody tr:last-child { border-bottom: none; }
-        tbody tr:hover { background: var(--bg); }
+        tbody tr:hover { background: #161616; }
 
-        .rank-pos { color: var(--dim); font-size: 11px; }
-        .rank-pos.gold { color: var(--yellow); }
-        .rank-pos.silver { color: var(--text); }
-        .rank-pos.bronze { color: #cd7f32; }
+        .pos-gold   { color: var(--yellow); }
+        .pos-silver { color: var(--text); }
+        .pos-bronze { color: #cd7f32; }
+        .wpm-v { color: var(--green); font-weight: 700; }
+        .acc-v { color: var(--cyan); }
+        .bar { display: inline-block; height: 3px; background: var(--green); border-radius: 2px; vertical-align: middle; margin-left: 8px; opacity: 0.35; }
 
-        .wpm-val { color: var(--green); font-weight: 700; }
-        .acc-val { color: var(--cyan); }
+        /* ══ ACERCA ══ */
+        #about { max-width: 720px; margin: 0 auto; }
 
-        .rank-bar {
-            display: inline-block;
-            height: 3px;
-            background: var(--green);
-            border-radius: 2px;
-            vertical-align: middle;
-            margin-left: 8px;
-            opacity: 0.4;
-        }
-
-        /* ─── ABOUT ─── */
-        #about { max-width: 700px; margin: 0 auto; }
-
-        .about-terminal {
+        .readme {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 4px;
+            border-radius: 6px;
             overflow: hidden;
         }
-        .about-bar {
-            background: var(--border);
-            padding: 10px 16px;
+        .readme-bar {
+            background: #161616;
+            border-bottom: 1px solid var(--border);
+            padding: 11px 16px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .about-bar .dot { width: 8px; height: 8px; }
-        .about-bar .filename { font-size: 11px; color: var(--dim); margin-left: 8px; }
-        .about-body { padding: 28px 32px; }
-
-        .info-block { margin-bottom: 20px; }
-        .info-key { font-size: 10px; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
-        .info-val { font-size: 13px; color: var(--bright); }
-        .info-val a { color: var(--cyan); text-decoration: none; }
-        .info-val a:hover { text-decoration: underline; }
-
+        .readme-bar .fn { font-size: 12px; color: var(--dim); margin-left: 10px; }
+        .readme-body { padding: 28px 32px; }
+        .iblock { margin-bottom: 20px; }
+        .ikey { font-size: 10px; color: var(--dim); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; }
+        .ival { font-size: 14px; color: var(--bright); line-height: 1.6; }
+        .ival.muted { font-size: 12px; color: var(--dim); }
+        .ival a { color: var(--cyan); text-decoration: none; }
+        .ival a:hover { text-decoration: underline; }
+        .divider { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
         .tech-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-        .tech-tag {
-            font-size: 10px;
-            padding: 4px 10px;
-            border-radius: 2px;
-            border: 1px solid var(--border);
-            color: var(--dim);
-        }
-        .tech-tag.highlight { border-color: var(--green); color: var(--green); }
-        .tech-tag.alt { border-color: var(--cyan); color: var(--cyan); }
+        .ttag { font-size: 11px; padding: 4px 10px; border-radius: 2px; border: 1px solid var(--border); color: var(--dim); }
+        .ttag.g { border-color: var(--green); color: var(--green); }
+        .ttag.c { border-color: var(--cyan);  color: var(--cyan); }
+        .copy { font-size: 11px; color: var(--muted); }
 
-        .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
-        .copyright { font-size: 10px; color: var(--muted); }
-
-        /* ─── FOOTER ─── */
+        /* ══ FOOTER ══ */
         footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: var(--bg);
+            position: fixed; bottom: 0; width: 100%;
+            background: rgba(13,13,13,0.96);
+            backdrop-filter: blur(8px);
             border-top: 1px solid var(--border);
-            padding: 10px 32px;
+            padding: 10px 28px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 10px;
+            font-size: 12px;
             color: var(--muted);
+            gap: 12px;
         }
-        footer .left { display: flex; gap: 16px; align-items: center; }
+        footer .fl { display: flex; gap: 14px; align-items: center; flex-shrink: 0; }
         footer .ping { color: var(--green); }
-        footer .right { color: var(--dim); }
+        footer .fr { font-size: 11px; color: var(--dim); text-align: right; }
 
-        /* ─── ANIMACIÓN ENTRADA ─── */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to   { opacity: 1; transform: translateY(0); }
+        /* ══ RESPONSIVE ══ */
+        @media (max-width: 700px) {
+            nav { padding: 0 16px; }
+            .nav-links, .nav-badge { display: none; }
+            .nav-hamburger { display: flex; }
+
+            .section { padding: calc(var(--nav-h) + 24px) 16px 80px; }
+
+            .win-body { padding: 18px 16px 22px; }
+            .cli-line { font-size: 12px; }
+            .hero-title { font-size: clamp(24px, 8vw, 40px); }
+
+            .kb-block { grid-template-columns: 1fr; }
+
+            table th:nth-child(4), table td:nth-child(4) { display: none; }
+
+            footer { padding: 8px 16px; }
+            footer .fr { display: none; }
+
+            .readme-body { padding: 20px 16px; }
+            .tbl-cmd { font-size: 11px; }
         }
-        .section.active { animation: fadeIn 0.25s ease; }
+
+        @media (max-width: 440px) {
+            .stat-row { gap: 12px; font-size: 10px; }
+            .btn-cli  { font-size: 11px; padding: 9px 14px; }
+            .steps-grid { grid-template-columns: 1fr; }
+            .bar { display: none; }
+            .win-title { display: none; }
+        }
     </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
+<!-- ═══ NAVBAR ═══ -->
 <nav>
     <div class="nav-logo">wpm</div>
-    <div class="nav-links">
-        <a href="#" class="nav-link active" onclick="showSection('home', this)">inicio</a>
-        <a href="#" class="nav-link" onclick="showSection('game', this)">jugar</a>
-        <a href="#" class="nav-link" onclick="showSection('instructions', this)">instrucciones</a>
-        <a href="#" class="nav-link" onclick="showSection('ranking', this)">ranking</a>
-        <a href="#" class="nav-link" onclick="showSection('about', this)">acerca</a>
+
+    <div class="nav-links" id="navLinks">
+        <a class="nav-link active" data-section="home">inicio</a>
+        <a class="nav-link" data-section="game">jugar</a>
+        <a class="nav-link" data-section="instructions">instrucciones</a>
+        <a class="nav-link" data-section="ranking">ranking</a>
+        <a class="nav-link" data-section="about">acerca</a>
     </div>
+
     <div class="nav-badge">ver <span>2026</span></div>
+
+    <div class="nav-hamburger" id="hamburger" onclick="toggleDrawer()">
+        <span></span><span></span><span></span>
+    </div>
 </nav>
 
-<!-- INICIO -->
-<section id="home" class="section active">
-    <div class="terminal-header">
-        <div class="dot dot-r"></div>
-        <div class="dot dot-y"></div>
-        <div class="dot dot-g"></div>
-        <span class="terminal-title">ramses@wpm-project:~</span>
-    </div>
+<!-- mobile drawer -->
+<div class="nav-drawer" id="navDrawer">
+    <a class="nav-link" data-section="home">inicio</a>
+    <a class="nav-link" data-section="game">jugar</a>
+    <a class="nav-link" data-section="instructions">instrucciones</a>
+    <a class="nav-link" data-section="ranking">ranking</a>
+    <a class="nav-link" data-section="about">acerca</a>
+</div>
 
-    <div class="terminal-box">
-        <div class="cmd-line">
-            <span class="prompt">❯</span>
-            <span class="cmd-text">./run_app.sh --mode production</span>
+<!-- ═══ HOME ═══ -->
+<section id="home" class="section">
+    <div class="terminal-window">
+        <div class="win-bar">
+            <div class="dot dot-r"></div>
+            <div class="dot dot-y"></div>
+            <div class="dot dot-g"></div>
+            <span class="win-title">ramses@wpm-project — bash — 82×24</span>
         </div>
-        <div class="cmd-line">
-            <span class="prompt" style="color:var(--dim)">→</span>
-            <span class="cmd-comment"># iniciando WPM Mecanografía v2026...</span>
-        </div>
+        <div class="win-body">
 
-        <div class="output-block">
-            <div class="big-title">
-                MEJORA TU<br>
-                <span class="accent">VELOCIDAD</span><span class="cursor"></span>
+            <div class="cli-line" id="l1">
+                <span class="p">❯</span>
+                <span class="cmd typewriter" id="tw1"></span>
             </div>
-            <div class="subtitle">Proyecto Integrador · Ramses Vladimir · 2026</div>
-            <div class="stat-row">
-                <span>plataformas: <span class="val">3</span></span>
-                <span>niveles: <span class="val">3</span></span>
-                <span>récord: <span class="val">148 WPM</span></span>
+            <div class="out" id="o1">
+                <span class="cmt"># iniciando WPM Mecanografía v2026...</span>
             </div>
-        </div>
 
-        <div class="cmd-line" style="margin-top:8px;">
-            <span class="prompt">❯</span>
-            <button class="btn-primary" onclick="showSection('game', document.querySelector('[onclick*=game]'))">
-                start_game --now
-            </button>
+            <div class="cli-line" id="l2">
+                <span class="p">❯</span>
+                <span class="cmd typewriter" id="tw2"></span>
+            </div>
+            <div class="out" id="o2">
+                <div class="hero-title">MEJORA TU<br><span class="acc">VELOCIDAD</span></div>
+                <div class="hero-sub">Proyecto Integrador · Ramses Vladimir · 2026</div>
+                <div class="stat-row">
+                    <span>plataformas: <span class="v">3</span></span>
+                    <span>niveles: <span class="v">3</span></span>
+                    <span>récord: <span class="v">148 WPM</span></span>
+                </div>
+            </div>
+
+            <div class="cli-line" id="l3">
+                <span class="p">❯</span>
+                <span class="cmd typewriter" id="tw3"></span>
+            </div>
+            <div class="out" id="o3">
+                <button class="btn-cli" onclick="showSection('game')">start_game --now</button>
+            </div>
+
         </div>
     </div>
 
     <div class="platforms">
-        <span class="platform-tag web">● WEB</span>
-        <span class="platform-tag android">● ANDROID (EXPO)</span>
-        <span class="platform-tag ios">○ IOS (EXPO)</span>
+        <span class="ptag web">● WEB</span>
+        <span class="ptag droid">● ANDROID (EXPO)</span>
+        <span class="ptag">○ IOS (EXPO)</span>
     </div>
 </section>
 
-<!-- JUGAR -->
+<!-- ═══ GAME ═══ -->
 <section id="game" class="section">
-    <div class="game-header">
-        <div style="display:flex;align-items:center;gap:10px;font-size:11px;">
-            <span style="color:var(--dim)">~/wpm/game</span>
-        </div>
-        <div class="status">
-            <div class="status-item"><div class="status-dot"></div><span>unity webgl</span></div>
-            <div class="status-item" style="color:var(--dim)">ESPACIO para iniciar · ESC para menú</div>
-        </div>
+    <div class="game-hdr">
+        <span style="color:var(--dim)">~/wpm/game</span>
+        <span><span class="pulse-dot"></span>unity webgl · ready</span>
     </div>
-
     <div id="unityContainer"></div>
-
-    <div class="game-footer">
-        <span class="key-hint"><kbd>SPACE</kbd> iniciar</span>
-        <span class="key-hint"><kbd>ESC</kbd> menú</span>
-        <span class="key-hint"><kbd>F</kbd> + <kbd>J</kbd> dedos índice</span>
+    <div class="game-ftr">
+        <span><kbd>SPACE</kbd> iniciar</span>
+        <span><kbd>ESC</kbd> menú</span>
+        <span><kbd>F</kbd> + <kbd>J</kbd> dedos índice</span>
     </div>
 </section>
 
-<!-- INSTRUCCIONES -->
+<!-- ═══ INSTRUCCIONES ═══ -->
 <section id="instructions" class="section">
-    <div class="section-label">// docs</div>
-    <div class="section-title">cómo <span class="accent">jugar</span></div>
+    <div class="sec-label">// docs</div>
+    <div class="sec-title">cómo <span class="acc">jugar</span></div>
 
     <div class="steps-grid">
         <div class="step">
-            <div class="step-num">paso <span>01</span></div>
-            <div class="step-title">elige nivel</div>
-            <div class="step-desc">fácil · medio · difícil<br>cada nivel ajusta la velocidad y complejidad del texto</div>
+            <div class="step-n">paso <span>01</span></div>
+            <div class="step-t">elige nivel</div>
+            <div class="step-d">fácil · medio · difícil<br>cada nivel ajusta velocidad y complejidad del texto</div>
         </div>
         <div class="step">
-            <div class="step-num">paso <span>02</span></div>
-            <div class="step-title">tipea rápido</div>
-            <div class="step-desc">sin errores — cada error resta puntos al contador final de WPM</div>
+            <div class="step-n">paso <span>02</span></div>
+            <div class="step-t">tipea rápido</div>
+            <div class="step-d">sin errores — cada error resta puntos al WPM final</div>
         </div>
         <div class="step">
-            <div class="step-num">paso <span>03</span></div>
-            <div class="step-title">supera récord</div>
-            <div class="step-desc">termina en el top y entra al ranking global del servidor</div>
+            <div class="step-n">paso <span>03</span></div>
+            <div class="step-t">supera récord</div>
+            <div class="step-d">termina en el top y entra al ranking global</div>
         </div>
     </div>
 
-    <div class="keyboard-block">
+    <div class="kb-block">
         <div>
             <img src="/TemplateData/mecanografia.jpg" alt="Posición de manos en teclado">
         </div>
         <div>
-            <div class="section-label" style="margin-bottom:16px;">// fila hogar</div>
+            <div class="sec-label" style="margin-bottom:16px;">// fila hogar</div>
             <div class="hand-map">
-                <div class="row">
-                    <span class="hand-label">izquierda</span>
+                <div class="hrow">
+                    <span class="hlabel">izquierda</span>
                     <div class="keys">
-                        <span class="key">A</span>
-                        <span class="key">S</span>
-                        <span class="key">D</span>
-                        <span class="key home">F ●</span>
+                        <span class="key">A</span><span class="key">S</span>
+                        <span class="key">D</span><span class="key home">F ●</span>
                     </div>
                 </div>
-                <div class="row">
-                    <span class="hand-label">derecha</span>
+                <div class="hrow">
+                    <span class="hlabel">derecha</span>
                     <div class="keys">
-                        <span class="key home">● J</span>
-                        <span class="key">K</span>
-                        <span class="key">L</span>
-                        <span class="key">Ñ</span>
+                        <span class="key home">● J</span><span class="key">K</span>
+                        <span class="key">L</span><span class="key">Ñ</span>
                     </div>
                 </div>
-                <div class="row" style="margin-top:8px;">
-                    <span class="hand-label" style="color:var(--green);font-size:10px;">● = índice</span>
+                <div class="hrow" style="margin-top:6px;">
+                    <span style="font-size:10px;color:var(--green)">● = dedo índice (home row)</span>
                 </div>
             </div>
-            <a href="https://www.youtube.com/watch?v=lcxkRC1kTvQ" target="_blank" rel="noopener" class="video-btn">
+            <a href="https://www.youtube.com/watch?v=lcxkRC1kTvQ" target="_blank" rel="noopener" class="vid-btn">
                 ver tutorial en video
             </a>
         </div>
     </div>
 </section>
 
-<!-- RANKING -->
+<!-- ═══ RANKING ═══ -->
 <section id="ranking" class="section">
-    <div class="section-label">// leaderboard</div>
-    <div class="section-title">ranking <span class="accent">global</span></div>
+    <div class="sec-label">// leaderboard</div>
+    <div class="sec-title">ranking <span class="acc">global</span></div>
 
-    <div class="table-wrap">
-        <div class="table-cmd">
-            <span class="prompt">❯</span>
+    <div class="tbl-wrap">
+        <div class="tbl-cmd">
+            <span class="p">❯</span>
             <span>SELECT * FROM scores ORDER BY wpm DESC LIMIT 10;</span>
         </div>
         <table>
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>jugador</th>
-                    <th>wpm</th>
-                    <th>precisión</th>
+                    <th>#</th><th>jugador</th><th>wpm</th><th>precisión</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td><span class="rank-pos gold">01</span></td>
+                    <td><span class="pos-gold">01</span></td>
                     <td>Vladi123</td>
-                    <td><span class="wpm-val">148</span><span class="rank-bar" style="width:74px"></span></td>
-                    <td><span class="acc-val">99%</span></td>
+                    <td><span class="wpm-v">148</span><span class="bar" style="width:74px"></span></td>
+                    <td><span class="acc-v">99%</span></td>
                 </tr>
                 <tr>
-                    <td><span class="rank-pos silver">02</span></td>
+                    <td><span class="pos-silver">02</span></td>
                     <td>Marlon Montoya</td>
-                    <td><span class="wpm-val">132</span><span class="rank-bar" style="width:66px"></span></td>
-                    <td><span class="acc-val">97%</span></td>
+                    <td><span class="wpm-v">132</span><span class="bar" style="width:66px"></span></td>
+                    <td><span class="acc-v">97%</span></td>
                 </tr>
                 <tr>
-                    <td><span class="rank-pos bronze">03</span></td>
+                    <td><span class="pos-bronze">03</span></td>
                     <td>Marco GLs</td>
-                    <td><span class="wpm-val">119</span><span class="rank-bar" style="width:60px"></span></td>
-                    <td><span class="acc-val">95%</span></td>
+                    <td><span class="wpm-v">119</span><span class="bar" style="width:60px"></span></td>
+                    <td><span class="acc-v">95%</span></td>
                 </tr>
             </tbody>
         </table>
     </div>
 </section>
 
-<!-- ACERCA DE -->
+<!-- ═══ ACERCA ═══ -->
 <section id="about" class="section">
-    <div class="section-label">// readme</div>
-    <div class="section-title">acerca del <span class="accent">proyecto</span></div>
+    <div class="sec-label">// readme</div>
+    <div class="sec-title">acerca del <span class="acc">proyecto</span></div>
 
-    <div class="about-terminal">
-        <div class="about-bar">
+    <div class="readme">
+        <div class="readme-bar">
             <div class="dot dot-r"></div>
             <div class="dot dot-y"></div>
             <div class="dot dot-g"></div>
-            <span class="filename">README.md</span>
+            <span class="fn">README.md</span>
         </div>
-        <div class="about-body">
-            <div class="info-block">
-                <div class="info-key">nombre</div>
-                <div class="info-val">WPM — Juego de Mecanografía</div>
+        <div class="readme-body">
+            <div class="iblock">
+                <div class="ikey">nombre</div>
+                <div class="ival">WPM — Juego de Mecanografía</div>
             </div>
-            <div class="info-block">
-                <div class="info-key">autor</div>
-                <div class="info-val">Ramses Vladimir</div>
+            <div class="iblock">
+                <div class="ikey">autor</div>
+                <div class="ival">Ramses Vladimir</div>
             </div>
-            <div class="info-block">
-                <div class="info-key">tipo</div>
-                <div class="info-val">Proyecto Integrador Universitario</div>
+            <div class="iblock">
+                <div class="ikey">tipo</div>
+                <div class="ival">Proyecto Integrador Universitario</div>
             </div>
-            <div class="info-block">
-                <div class="info-key">descripción</div>
-                <div class="info-val" style="font-size:12px;color:var(--dim);line-height:1.8;">
-                    Juego de mecanografía multiplataforma desarrollado con Unity (WebGL) para web y React Native + Expo Go para dispositivos móviles.
+            <div class="iblock">
+                <div class="ikey">descripción</div>
+                <div class="ival muted">
+                    Juego de mecanografía multiplataforma desarrollado en Unity (WebGL) para web y React Native + Expo Go para dispositivos móviles Android e iOS.
                 </div>
             </div>
             <hr class="divider">
-            <div class="info-block">
-                <div class="info-key">stack técnico</div>
+            <div class="iblock">
+                <div class="ikey">stack técnico</div>
                 <div class="tech-list">
-                    <span class="tech-tag highlight">Unity WebGL</span>
-                    <span class="tech-tag alt">React Native</span>
-                    <span class="tech-tag alt">Expo Go</span>
-                    <span class="tech-tag">HTML / CSS / JS</span>
-                    <span class="tech-tag">Android</span>
-                    <span class="tech-tag">iOS</span>
+                    <span class="ttag g">Unity WebGL</span>
+                    <span class="ttag c">React Native</span>
+                    <span class="ttag c">Expo Go</span>
+                    <span class="ttag">HTML / CSS / JS</span>
+                    <span class="ttag">Android</span>
+                    <span class="ttag">iOS</span>
                 </div>
             </div>
             <hr class="divider">
-            <div class="copyright">© 2026 — todos los derechos reservados</div>
+            <div class="copy">© 2026 — todos los derechos reservados</div>
         </div>
     </div>
 </section>
 
-<!-- FOOTER -->
+<!-- ═══ FOOTER ═══ -->
 <footer>
-    <div class="left">
+    <div class="fl">
         <span>WPM</span>
         <span class="ping">● online</span>
     </div>
-    <div class="right">multiplataforma: web + android + ios · proyecto universitario 2026</div>
+    <div class="fr">multiplataforma: web + android + ios · proyecto universitario 2026</div>
 </footer>
 
-<!-- SCRIPTS UNITY -->
 <script src="TemplateData/UnityProgress.js"></script>
 <script src="Build/UnityLoader.js"></script>
 <script>
-    function showSection(id, el) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+// ── navigation ───────────────────────────────────────────────
+function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(l =>
+        l.classList.toggle('active', l.dataset.section === id)
+    );
+    document.getElementById(id).classList.add('active');
+    document.getElementById('navDrawer').classList.remove('open');
 
-        document.getElementById(id).classList.add('active');
-        if (el && el.classList) el.classList.add('active');
-
-        if (id === 'game' && !window.unityLoaded) {
-            window.unityLoaded = true;
-            if (typeof UnityLoader !== 'undefined') {
-                UnityLoader.instantiate("unityContainer", "Build/INTEGRADORA.json", {
-                    onProgress: typeof UnityProgress !== 'undefined' ? UnityProgress : undefined
-                });
-            }
+    if (id === 'game' && !window.unityLoaded) {
+        window.unityLoaded = true;
+        if (typeof UnityLoader !== 'undefined') {
+            UnityLoader.instantiate("unityContainer", "Build/INTEGRADORA.json", {
+                onProgress: typeof UnityProgress !== 'undefined' ? UnityProgress : undefined
+            });
         }
     }
+    if (id === 'home') runTypewriter();
+}
 
-    window.onload = () => showSection('home', document.querySelector('.nav-link'));
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+        showSection(link.dataset.section);
+    });
+});
+
+function toggleDrawer() {
+    document.getElementById('navDrawer').classList.toggle('open');
+}
+
+// ── typewriter ───────────────────────────────────────────────
+const TW_LINES = [
+    { tw:'tw1', line:'l1', out:'o1', text:'./run_app.sh --mode production', delay:300  },
+    { tw:'tw2', line:'l2', out:'o2', text:'cat project_info.md',            delay:1700 },
+    { tw:'tw3', line:'l3', out:'o3', text:'start_game --difficulty easy',   delay:3200 },
+];
+
+let twDone = false;
+
+function typeText(el, text, speed, onDone) {
+    el.textContent = '';
+    el.classList.add('typing');
+    let i = 0;
+    const tick = setInterval(() => {
+        el.textContent += text[i++];
+        if (i >= text.length) {
+            clearInterval(tick);
+            el.classList.remove('typing');
+            onDone && onDone();
+        }
+    }, speed);
+}
+
+function runTypewriter() {
+    // reset
+    TW_LINES.forEach(({ tw, line, out }) => {
+        document.getElementById(line).classList.remove('visible');
+        document.getElementById(out).classList.remove('visible');
+        document.getElementById(tw).textContent = '';
+    });
+    twDone = false;
+
+    TW_LINES.forEach(({ tw, line, out, text, delay }) => {
+        setTimeout(() => {
+            const lineEl = document.getElementById(line);
+            const twEl   = document.getElementById(tw);
+            const outEl  = document.getElementById(out);
+            lineEl.classList.add('visible');
+            typeText(twEl, text, 36, () => {
+                setTimeout(() => outEl.classList.add('visible'), 100);
+            });
+        }, delay);
+    });
+}
+
+// ── init ─────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+    showSection('home');
+});
 </script>
 </body>
 </html>
